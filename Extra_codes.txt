@@ -1,0 +1,77 @@
+Exercício 1: Passar dados via serial e transmitir a mensagem "UFSCAR". Usar interrupção.
+
+ORG 0
+    LJMP inicio
+
+ORG 023H
+    LJMP serial
+
+ORG 30H
+inicio:
+    MOV SCON, #10010000b
+    MOV PCON, #10000000b
+    MOV IE, #90H
+    MOV IP, #0H
+    MOV R0, #30H
+    MOV A, R0
+    MOV SBUF, A
+fim1:
+    LJMP fim1
+
+
+serial:
+    INC R0
+    MOV A, R0
+    MOV SBUF, A
+    CJNE @R0, ETX, sai
+fim2:
+    LJMP fim2
+sai:
+    RET i
+
+
+
+Exercicio 2: Transmitir dados em serial e verificar se a transmissão foi bem sucedida
+
+ORG 0
+    LJMP inicio
+
+ORG 23H
+    LJMP serial
+
+ORG 30H
+inicio:
+    MOV SCON, #10010000b
+    MOV PCON, #10000000b
+    MOV IE, #90H
+volta:
+    MOV IP, #0H
+    MOV R0, #30H
+    MOV A, @R0
+    MOV SBUF, A
+fim1:
+    LJMP fim1
+
+
+serial:
+    JB RI, recepcao
+    CJNE @R0, ETX, transmite
+    MOV SBUF, ETX
+    RET I
+
+transmite:
+    INC R0
+    MOV A, @R0
+    MOV SBUF, A
+    RET I
+
+recepcao:
+    MOV A, SBUF
+    CJNE A, ACK, retransmite
+    RET I
+
+retransmite:
+    MOV R0, 30H
+    MOV A, @R0
+    MOV SBUF, A
+    RET I
